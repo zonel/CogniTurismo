@@ -10,6 +10,11 @@
         <mxCell id="CfH5yJDIyVk5vHO6dM0E-5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="CfH5yJDIyVk5vHO6dM0E-2" target="CfH5yJDIyVk5vHO6dM0E-4" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
+        <mxCell id="wO8aZNIX2LMmA1Gr4mB2-2" value="&lt;h2&gt;MQTT&lt;/h2&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="CfH5yJDIyVk5vHO6dM0E-5">
+          <mxGeometry x="-0.2" y="-2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
         <mxCell id="CfH5yJDIyVk5vHO6dM0E-2" value="&lt;h2&gt;&amp;nbsp;Self-Driving Cars&lt;/h2&gt;&amp;nbsp;(Sending telemetry: location, battery, temp, etc.)&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0050ef;fontColor=#ffffff;strokeColor=#001DBC;" parent="1" vertex="1">
           <mxGeometry x="310" y="60" width="300" height="130" as="geometry" />
         </mxCell>
@@ -24,6 +29,11 @@
               <mxPoint x="815" y="320" />
               <mxPoint x="610" y="320" />
             </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wO8aZNIX2LMmA1Gr4mB2-1" value="&lt;h2&gt;MQTT&lt;/h2&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="CfH5yJDIyVk5vHO6dM0E-9">
+          <mxGeometry x="0.0667" y="-1" relative="1" as="geometry">
+            <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="CfH5yJDIyVk5vHO6dM0E-8" value="&lt;h2&gt;&amp;nbsp;Traffic Simulator&lt;/h2&gt;- Generates high-volume sensor data for testing&amp;nbsp;&amp;nbsp;&lt;br&gt;- Simulates self-driving car behavior" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;" parent="1" vertex="1">
