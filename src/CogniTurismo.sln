@@ -8,6 +8,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelemetryIngestionService.I
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelemetryIngestionService.Api", "TelemetryIngestionService.Api\TelemetryIngestionService.Api.csproj", "{3DC3D92A-4394-4995-81C6-EA375AC88AF1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TrafficSimulator", "TrafficSimulator", "{8EC16A61-F9A8-47A3-81FB-CC8A2591E8B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrafficSimulatorService", "TrafficSimulatorService\TrafficSimulatorService.csproj", "{166F2D93-A9E8-4745-B8D6-1E8645433F44}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,6 +21,7 @@ Global
 		{6C221EC6-5666-4E9A-918C-D8152D1887E7} = {2D8DC61D-3A7F-4149-985A-75FB9AFEE6AA}
 		{A0464EBB-19E0-450F-B5AD-463A1A4C4C4C} = {2D8DC61D-3A7F-4149-985A-75FB9AFEE6AA}
 		{3DC3D92A-4394-4995-81C6-EA375AC88AF1} = {2D8DC61D-3A7F-4149-985A-75FB9AFEE6AA}
+		{166F2D93-A9E8-4745-B8D6-1E8645433F44} = {8EC16A61-F9A8-47A3-81FB-CC8A2591E8B2}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{6C221EC6-5666-4E9A-918C-D8152D1887E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -31,5 +36,9 @@ Global
 		{3DC3D92A-4394-4995-81C6-EA375AC88AF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DC3D92A-4394-4995-81C6-EA375AC88AF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DC3D92A-4394-4995-81C6-EA375AC88AF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{166F2D93-A9E8-4745-B8D6-1E8645433F44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{166F2D93-A9E8-4745-B8D6-1E8645433F44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{166F2D93-A9E8-4745-B8D6-1E8645433F44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{166F2D93-A9E8-4745-B8D6-1E8645433F44}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
