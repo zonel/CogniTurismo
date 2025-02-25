@@ -21,5 +21,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 var mqttService = app.Services.GetRequiredService<MqttClientService>();
+await mqttService.StartAsync();
 
 app.Run();

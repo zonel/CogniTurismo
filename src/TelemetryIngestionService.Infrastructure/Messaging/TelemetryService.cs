@@ -8,6 +8,7 @@ public class TelemetryService(TelemetryRepository repository) : ITelemetryServic
 {
     public async Task ProcessTelemetryData(TelemetryData data)
     {
-        await repository.AddAsync(data);
+        Console.WriteLine("✅ processing telemetry data");
+        //await repository.AddAsync(data);
     }
 }
