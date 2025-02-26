@@ -11,7 +11,7 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - citus-coordinator-data:/var/lib/postgresql/data
-      - ./postgres-init:/docker-entrypoint-initdb.d
+      - ./infrastructure/citus-cluster/postgres-init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 5s
@@ -29,7 +29,7 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - citus-worker1-data:/var/lib/postgresql/data
-      - ./postgres-init/01-worker-init.sh:/docker-entrypoint-initdb.d/01-worker-init.sh
+      - ./infrastructure/citus-cluster/postgres-init/01-worker-init.sh:/docker-entrypoint-initdb.d/01-worker-init.sh
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 5s
@@ -47,7 +47,7 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - citus-worker2-data:/var/lib/postgresql/data
-      - ./postgres-init/01-worker-init.sh:/docker-entrypoint-initdb.d/01-worker-init.sh
+      - ./infrastructure/citus-cluster/postgres-init/01-worker-init.sh:/docker-entrypoint-initdb.d/01-worker-init.sh
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 5s
@@ -64,10 +64,8 @@ services:
     environment:
       POSTGRES_PASSWORD: postgres
       POSTGRES_HOST_AUTH_METHOD: trust
-      CURRENT_DATE: "2025-02-26 14:43:42"
-      CURRENT_USER: "zonel"
     volumes:
-      - ./postgres-init/setup-scripts:/setup-scripts
+      - ./infrastructure/citus-cluster/postgres-init/setup-scripts:/setup-scripts
     depends_on:
       citus_coordinator:
         condition: service_healthy
@@ -84,6 +82,16 @@ services:
     restart: "no"  # Run once and exit
     networks:
       - citus-network
+
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./infrastructure/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+    restart: unless-stopped
 
 networks:
   citus-network:

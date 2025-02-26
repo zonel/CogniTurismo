@@ -18,7 +18,7 @@ if [ "$TABLE_EXISTS" = "t" ]; then
   
   # Now drop the table
   echo "Dropping existing telemetry_data table..."
-  PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "DROP TABLE IF EXISTS telemetry_data;"
+  PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "DROP TABLE IF EXISTS telemetry_data CASCADE;"
 else
   echo "Table telemetry_data doesn't exist, proceeding with creation."
 fi
@@ -81,7 +81,7 @@ BEGIN
 END;
 \$\$ LANGUAGE plpgsql;"
 
-# Create a function to find vehicles near a location - FIXED VERSION
+# Create a function to find vehicles near a location
 echo "Creating find_vehicles_near_location function..."
 PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "
 CREATE OR REPLACE FUNCTION find_vehicles_near_location(
@@ -128,17 +128,17 @@ BEGIN
 END;
 \$\$ LANGUAGE plpgsql;"
 
-# Insert test data for multiple vehicles - using current UTC time
+# Insert test data for multiple vehicles with the current timestamp
 echo "Inserting test data..."
 PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "
 INSERT INTO telemetry_data (id, vehicle_id, latitude, longitude, speed, battery_percentage, battery_temperature, recorded_at)
 VALUES 
-    (gen_random_uuid(), 'vehicle-001', 52.5200, 13.4050, 45.5, 78.2, 24.5, '2025-02-26 14:42:41'),
-    (gen_random_uuid(), 'vehicle-001', 52.5201, 13.4052, 42.0, 77.9, 24.7, '2025-02-26 14:42:42'),
-    (gen_random_uuid(), 'vehicle-001', 52.5203, 13.4055, 40.5, 77.5, 24.8, '2025-02-26 14:41:43'),
-    (gen_random_uuid(), 'vehicle-002', 48.8566, 2.3522, 38.2, 65.3, 23.1, '2025-02-26 14:42:44'),
-    (gen_random_uuid(), 'vehicle-002', 48.8567, 2.3525, 39.1, 64.9, 23.3, '2025-02-26 14:42:45'),
-    (gen_random_uuid(), 'vehicle-003', 40.7128, -74.0060, 22.5, 90.1, 22.0, '2025-02-26 14:42:46');"
+    (gen_random_uuid(), 'vehicle-001', 52.5200, 13.4050, 45.5, 78.2, 24.5, '2025-02-26 15:36:51'),
+    (gen_random_uuid(), 'vehicle-001', 52.5201, 13.4052, 42.0, 77.9, 24.7, '2025-02-26 15:36:52'),
+    (gen_random_uuid(), 'vehicle-001', 52.5203, 13.4055, 40.5, 77.5, 24.8, '2025-02-26 15:35:53'),
+    (gen_random_uuid(), 'vehicle-002', 48.8566, 2.3522, 38.2, 65.3, 23.1, '2025-02-26 15:36:54'),
+    (gen_random_uuid(), 'vehicle-002', 48.8567, 2.3525, 39.1, 64.9, 23.3, '2025-02-26 15:36:55'),
+    (gen_random_uuid(), 'vehicle-003', 40.7128, -74.0060, 22.5, 90.1, 22.0, '2025-02-26 15:36:56');"
 
 # Show shard distribution information
 echo "Shard distribution:"
@@ -170,9 +170,9 @@ ORDER BY vehicle_id;"
 echo "Testing get_vehicle_telemetry function for vehicle-001:"
 PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "
 SELECT vehicle_id, latitude, longitude, speed, battery_percentage, recorded_at 
-FROM get_vehicle_telemetry('vehicle-001', '2025-02-26 12:00:00', '2025-02-26 15:00:00');"
+FROM get_vehicle_telemetry('vehicle-001', '2025-02-26 12:00:00', '2025-02-26 16:00:00');"
 
-# Test the find_vehicles_near_location function - Fixed version
+# Test the find_vehicles_near_location function
 echo "Testing find_vehicles_near_location function (Berlin area):"
 PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "
 SELECT vehicle_id, latitude, longitude, distance_km, recorded_at 

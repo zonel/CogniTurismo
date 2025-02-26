@@ -14,7 +14,7 @@ public class TrafficSimulatorService
         _settings = settings.Value;
 
         var factory = new MqttFactory();
-        _mqttClient = factory.CreateMqttClient();
+        _mqttClient = factory.CreateMqttClient()!;
     }
 
     public async Task StartAsync()
