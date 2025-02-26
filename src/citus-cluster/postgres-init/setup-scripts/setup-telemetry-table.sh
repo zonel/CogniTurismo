@@ -4,13 +4,28 @@ set -e
 echo "Creating optimized telemetry table for high-volume data..."
 
 # Enable pgcrypto extension
-docker exec citus_coordinator psql -U postgres -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
+PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
 
-# Drop existing table if it exists
-docker exec citus_coordinator psql -U postgres -c "DROP TABLE IF EXISTS telemetry_data;"
+# Clean up any existing objects that might cause conflicts
+# First check if the table exists
+TABLE_EXISTS=$(PGPASSWORD=postgres psql -h citus_coordinator -U postgres -t -c "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'telemetry_data');" | xargs)
+
+if [ "$TABLE_EXISTS" = "t" ]; then
+  # Drop dependent functions first
+  echo "Dropping dependent functions..."
+  PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "DROP FUNCTION IF EXISTS get_vehicle_telemetry(character varying, timestamp with time zone, timestamp with time zone);"
+  PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "DROP FUNCTION IF EXISTS find_vehicles_near_location(double precision, double precision, double precision);"
+  
+  # Now drop the table
+  echo "Dropping existing telemetry_data table..."
+  PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "DROP TABLE IF EXISTS telemetry_data;"
+else
+  echo "Table telemetry_data doesn't exist, proceeding with creation."
+fi
 
 # Create the telemetry table
-docker exec citus_coordinator psql -U postgres -c "
+echo "Creating telemetry_data table..."
+PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "
 CREATE TABLE telemetry_data (
     id UUID NOT NULL,
     vehicle_id VARCHAR(50) NOT NULL,
@@ -29,22 +44,26 @@ CREATE TABLE telemetry_data (
 );"
 
 # Distribute the table
-docker exec citus_coordinator psql -U postgres -c "SELECT create_distributed_table('telemetry_data', 'vehicle_id');"
+echo "Distributing the table..."
+PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "SELECT create_distributed_table('telemetry_data', 'vehicle_id');"
 
 # Optimize for write-heavy workloads
-docker exec citus_coordinator psql -U postgres -c "
+echo "Optimizing table settings..."
+PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "
 ALTER TABLE telemetry_data SET (
     autovacuum_vacuum_scale_factor = 0.05,
     autovacuum_analyze_scale_factor = 0.02
 );"
 
 # Create indexes
-docker exec citus_coordinator psql -U postgres -c "CREATE INDEX idx_telemetry_vehicle_time ON telemetry_data (vehicle_id, recorded_at DESC);"
-docker exec citus_coordinator psql -U postgres -c "CREATE INDEX idx_telemetry_vehicle_battery ON telemetry_data (vehicle_id, battery_percentage);"
-docker exec citus_coordinator psql -U postgres -c "CREATE INDEX idx_telemetry_location ON telemetry_data (latitude, longitude);"
+echo "Creating indexes..."
+PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "CREATE INDEX idx_telemetry_vehicle_time ON telemetry_data (vehicle_id, recorded_at DESC);"
+PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "CREATE INDEX idx_telemetry_vehicle_battery ON telemetry_data (vehicle_id, battery_percentage);"
+PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "CREATE INDEX idx_telemetry_location ON telemetry_data (latitude, longitude);"
 
 # Create a function to get vehicle telemetry within a time range
-docker exec citus_coordinator psql -U postgres -c "
+echo "Creating get_vehicle_telemetry function..."
+PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "
 CREATE OR REPLACE FUNCTION get_vehicle_telemetry(
     vehicle_id_param VARCHAR,
     start_time TIMESTAMPTZ,
@@ -62,8 +81,9 @@ BEGIN
 END;
 \$\$ LANGUAGE plpgsql;"
 
-# Create a function to find vehicles near a location
-docker exec citus_coordinator psql -U postgres -c "
+# Create a function to find vehicles near a location - FIXED VERSION
+echo "Creating find_vehicles_near_location function..."
+PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "
 CREATE OR REPLACE FUNCTION find_vehicles_near_location(
     lat DOUBLE PRECISION, 
     lon DOUBLE PRECISION,
@@ -108,20 +128,21 @@ BEGIN
 END;
 \$\$ LANGUAGE plpgsql;"
 
-# Insert test data for multiple vehicles - updated with current UTC time
-docker exec citus_coordinator psql -U postgres -c "
+# Insert test data for multiple vehicles - using current UTC time
+echo "Inserting test data..."
+PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "
 INSERT INTO telemetry_data (id, vehicle_id, latitude, longitude, speed, battery_percentage, battery_temperature, recorded_at)
 VALUES 
-    (gen_random_uuid(), 'vehicle-001', 52.5200, 13.4050, 45.5, 78.2, 24.5, '2025-02-26 13:09:01'),
-    (gen_random_uuid(), 'vehicle-001', 52.5201, 13.4052, 42.0, 77.9, 24.7, '2025-02-26 13:08:01'),
-    (gen_random_uuid(), 'vehicle-001', 52.5203, 13.4055, 40.5, 77.5, 24.8, '2025-02-26 13:07:01'),
-    (gen_random_uuid(), 'vehicle-002', 48.8566, 2.3522, 38.2, 65.3, 23.1, '2025-02-26 13:09:01'),
-    (gen_random_uuid(), 'vehicle-002', 48.8567, 2.3525, 39.1, 64.9, 23.3, '2025-02-26 13:08:01'),
-    (gen_random_uuid(), 'vehicle-003', 40.7128, -74.0060, 22.5, 90.1, 22.0, '2025-02-26 13:09:01');"
+    (gen_random_uuid(), 'vehicle-001', 52.5200, 13.4050, 45.5, 78.2, 24.5, '2025-02-26 14:42:41'),
+    (gen_random_uuid(), 'vehicle-001', 52.5201, 13.4052, 42.0, 77.9, 24.7, '2025-02-26 14:42:42'),
+    (gen_random_uuid(), 'vehicle-001', 52.5203, 13.4055, 40.5, 77.5, 24.8, '2025-02-26 14:41:43'),
+    (gen_random_uuid(), 'vehicle-002', 48.8566, 2.3522, 38.2, 65.3, 23.1, '2025-02-26 14:42:44'),
+    (gen_random_uuid(), 'vehicle-002', 48.8567, 2.3525, 39.1, 64.9, 23.3, '2025-02-26 14:42:45'),
+    (gen_random_uuid(), 'vehicle-003', 40.7128, -74.0060, 22.5, 90.1, 22.0, '2025-02-26 14:42:46');"
 
 # Show shard distribution information
 echo "Shard distribution:"
-docker exec citus_coordinator psql -U postgres -c "
+PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "
 SELECT 
   s.shardid, 
   n.nodename, 
@@ -139,7 +160,7 @@ ORDER BY
 
 # Show count per vehicle_id to verify sharding works
 echo "Records per vehicle:"
-docker exec citus_coordinator psql -U postgres -c "
+PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "
 SELECT vehicle_id, count(*) AS record_count
 FROM telemetry_data 
 GROUP BY vehicle_id
@@ -147,13 +168,13 @@ ORDER BY vehicle_id;"
 
 # Test the get_vehicle_telemetry function
 echo "Testing get_vehicle_telemetry function for vehicle-001:"
-docker exec citus_coordinator psql -U postgres -c "
+PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "
 SELECT vehicle_id, latitude, longitude, speed, battery_percentage, recorded_at 
-FROM get_vehicle_telemetry('vehicle-001', '2025-02-26 12:00:00', '2025-02-26 14:00:00');"
+FROM get_vehicle_telemetry('vehicle-001', '2025-02-26 12:00:00', '2025-02-26 15:00:00');"
 
-# Test the find_vehicles_near_location function
+# Test the find_vehicles_near_location function - Fixed version
 echo "Testing find_vehicles_near_location function (Berlin area):"
-docker exec citus_coordinator psql -U postgres -c "
+PGPASSWORD=postgres psql -h citus_coordinator -U postgres -c "
 SELECT vehicle_id, latitude, longitude, distance_km, recorded_at 
 FROM find_vehicles_near_location(52.52, 13.40, 10);"
 

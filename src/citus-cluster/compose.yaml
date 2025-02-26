@@ -1,0 +1,98 @@
+﻿version: '3.8'
+
+services:
+  citus_coordinator:
+    image: citusdata/citus:12.0
+    container_name: citus_coordinator
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - citus-coordinator-data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      citus-network:
+        ipv4_address: 172.25.0.2
+
+  citus_worker1:
+    image: citusdata/citus:12.0
+    container_name: citus_worker1
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - citus-worker1-data:/var/lib/postgresql/data
+      - ./postgres-init/01-worker-init.sh:/docker-entrypoint-initdb.d/01-worker-init.sh
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      citus-network:
+        ipv4_address: 172.25.0.3
+
+  citus_worker2:
+    image: citusdata/citus:12.0
+    container_name: citus_worker2
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - citus-worker2-data:/var/lib/postgresql/data
+      - ./postgres-init/01-worker-init.sh:/docker-entrypoint-initdb.d/01-worker-init.sh
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      citus-network:
+        ipv4_address: 172.25.0.4
+  
+  # This service runs once to configure the cluster after all nodes are up
+  citus_setup:
+    image: citusdata/citus:12.0
+    container_name: citus_setup
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+      CURRENT_DATE: "2025-02-26 14:43:42"
+      CURRENT_USER: "zonel"
+    volumes:
+      - ./postgres-init/setup-scripts:/setup-scripts
+    depends_on:
+      citus_coordinator:
+        condition: service_healthy
+      citus_worker1:
+        condition: service_healthy
+      citus_worker2:
+        condition: service_healthy
+    command: >
+      bash -c "cd /setup-scripts && 
+               chmod +x ./setup-cluster.sh && 
+               chmod +x ./setup-telemetry-table.sh && 
+               ./setup-cluster.sh && 
+               ./setup-telemetry-table.sh"
+    restart: "no"  # Run once and exit
+    networks:
+      - citus-network
+
+networks:
+  citus-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
+
+volumes:
+  citus-coordinator-data:
+  citus-worker1-data:
+  citus-worker2-data:
