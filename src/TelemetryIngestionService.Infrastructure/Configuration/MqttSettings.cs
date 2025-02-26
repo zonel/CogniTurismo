@@ -1,10 +1,11 @@
-namespace TelemetryIngestionService.Infrastructure.Configuration;
-
-public class MqttSettings
+namespace TelemetryIngestionService.Infrastructure.Configuration
 {
-    public string BrokerAddress { get; set; } = string.Empty;
-    public int Port { get; set; }
-    public string ClientId { get; set; } = string.Empty;
-    public string Topic { get; set; } = string.Empty;
-    public bool CleanSession { get; set; }
+    public class MqttSettings
+    {
+        public string BrokerAddress { get; set; } = string.Empty;
+        public int Port { get; set; } = 1883;
+        public string ClientId { get; set; } = string.Empty;
+        public bool CleanSession { get; set; } = true;
+        public string Topic { get; set; } = string.Empty;
+    }
 }

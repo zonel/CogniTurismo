@@ -1,5 +1,6 @@
 using TelemetryIngestionService.Infrastructure;
 using TelemetryIngestionService.Infrastructure.Messaging;
+using TelemetryIngestionService.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
