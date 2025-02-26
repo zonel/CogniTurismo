@@ -29,9 +29,9 @@ namespace TelemetryIngestionService.Infrastructure.Repositories
             {
                 const string sql = @"
                     INSERT INTO telemetry_data 
-                    (id, vehicle_id, latitude, longitude, speed, battery_percentage, battery_temperature, timestamp)
+                    (id, vehicle_id, latitude, longitude, speed, battery_percentage, battery_temperature, recorded_at)
                     VALUES 
-                    (@Id, @VehicleId, @Latitude, @Longitude, @Speed, @BatteryPercentage, @BatteryTemperature, @Timestamp)";
+                    (@Id, @VehicleId, @Latitude, @Longitude, @Speed, @BatteryPercentage, @BatteryTemperature, @RecordedAt)";
 
                 await connection.ExecuteAsync(sql, telemetryBatch, transaction);
                 
@@ -54,7 +54,7 @@ namespace TelemetryIngestionService.Infrastructure.Repositories
             dataTable.Columns.Add("Speed", typeof(double));
             dataTable.Columns.Add("BatteryPercentage", typeof(double));
             dataTable.Columns.Add("BatteryTemperature", typeof(double));
-            dataTable.Columns.Add("Timestamp", typeof(DateTime));
+            dataTable.Columns.Add("RecordedAt", typeof(DateTime));
 
             foreach (var item in telemetryBatch)
             {
@@ -66,14 +66,14 @@ namespace TelemetryIngestionService.Infrastructure.Repositories
                     item.Speed,
                     item.BatteryPercentage,
                     item.BatteryTemperature,
-                    item.Timestamp
+                    item.RecordedAt
                 );
             }
             
             using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
             
-            using var writer = connection.BeginBinaryImport("COPY telemetry_data (id, vehicle_id, latitude, longitude, speed, battery_percentage, battery_temperature, timestamp) FROM STDIN BINARY");
+            using var writer = connection.BeginBinaryImport("COPY telemetry_data (id, vehicle_id, latitude, longitude, speed, battery_percentage, battery_temperature, recorded_at) FROM STDIN BINARY");
             
             foreach (var item in telemetryBatch)
             {
@@ -85,7 +85,7 @@ namespace TelemetryIngestionService.Infrastructure.Repositories
                 await writer.WriteAsync(item.Speed, NpgsqlTypes.NpgsqlDbType.Double);
                 await writer.WriteAsync(item.BatteryPercentage, NpgsqlTypes.NpgsqlDbType.Double);
                 await writer.WriteAsync(item.BatteryTemperature, NpgsqlTypes.NpgsqlDbType.Double);
-                await writer.WriteAsync(item.Timestamp, NpgsqlTypes.NpgsqlDbType.Timestamp);
+                await writer.WriteAsync(item.RecordedAt, NpgsqlTypes.NpgsqlDbType.TimestampTz);
             }
             
             return await writer.CompleteAsync();

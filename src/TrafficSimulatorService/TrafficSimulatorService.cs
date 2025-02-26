@@ -49,11 +49,14 @@ public class TrafficSimulatorService
     {
         return new
         {
-            vehicleId = $"Car_{_random.Next(1, 100)}",
-            latitude = _random.NextDouble() * 180 - 90,
-            longitude = _random.NextDouble() * 360 - 180,
-            speed = _random.Next(0, 120),
-            timestamp = DateTime.UtcNow.ToString("o")
+            Id = Guid.NewGuid(),
+            VehicleId = $"Car_{_random.Next(1, 100)}",
+            Latitude = _random.NextDouble() * 180 - 90,
+            Longitude = _random.NextDouble() * 360 - 180,
+            Speed = _random.Next(0, 120),
+            BatteryPercentage = _random.NextDouble() * 100,
+            BatteryTemperature = _random.Next(15, 45),
+            RecordedAt = DateTime.UtcNow
         };
     }
 }

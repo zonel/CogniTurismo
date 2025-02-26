@@ -9,5 +9,5 @@ public class TelemetryData
     public double Speed { get; set; }
     public double BatteryPercentage { get; set; }
     public double BatteryTemperature { get; set; }
-    public DateTime Timestamp { get; set; }
+    public DateTime RecordedAt { get; set; }
 }

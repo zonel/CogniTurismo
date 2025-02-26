@@ -77,13 +77,6 @@ namespace TelemetryIngestionService.Infrastructure.Messaging
                 _lastLogTime = now;
             }
 
-            // Fast path - avoid creating a scope for each message if we're just logging
-            if (_logger.IsEnabled(LogLevel.Debug))
-            {
-                _logger.LogDebug("Received MQTT message on topic: {Topic}", 
-                    e.ApplicationMessage?.Topic ?? "unknown");
-            }
-
             // Use ValueTask to reduce allocations
             ValueTask ProcessMessageAsync()
             {
