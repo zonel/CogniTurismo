@@ -77,6 +77,14 @@ namespace TelemetryIngestionService.Infrastructure.Messaging
                 _lastLogTime = now;
             }
 
+            // Fire and forget to avoid waiting for processing
+            // This maximizes MQTT message reception throughput
+            _ = ProcessMessageAsync();
+            
+            // Complete the MQTT handler immediately to receive more messages
+            await Task.CompletedTask;
+            return;
+
             // Use ValueTask to reduce allocations
             ValueTask ProcessMessageAsync()
             {
@@ -105,13 +113,6 @@ namespace TelemetryIngestionService.Infrastructure.Messaging
                     return new ValueTask();
                 }
             }
-
-            // Fire and forget to avoid waiting for processing
-            // This maximizes MQTT message reception throughput
-            _ = ProcessMessageAsync();
-            
-            // Complete the MQTT handler immediately to receive more messages
-            await Task.CompletedTask;
         }
 
         private async Task HandleConnected(MqttClientConnectedEventArgs _)

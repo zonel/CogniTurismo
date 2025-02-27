@@ -21,9 +21,4 @@ namespace TelemetryIngestionService.Infrastructure.Services
             return Task.CompletedTask;
         }
     }
-    
-    public interface ITelemetryService
-    {
-        Task ProcessTelemetryData(TelemetryData data);
-    }
 }
