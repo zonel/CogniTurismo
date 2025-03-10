@@ -57,7 +57,6 @@ services:
       citus-network:
         ipv4_address: 172.25.0.4
   
-  # This service runs once to configure the cluster after all nodes are up
   citus_setup:
     image: citusdata/citus:12.0
     container_name: citus_setup
@@ -79,7 +78,7 @@ services:
                chmod +x ./setup-telemetry-table.sh && 
                ./setup-cluster.sh && 
                ./setup-telemetry-table.sh"
-    restart: "no"  # Run once and exit
+    restart: "no"
     networks:
       - citus-network
 
@@ -91,6 +90,17 @@ services:
       - "9001:9001"
     volumes:
       - ./infrastructure/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
     restart: unless-stopped
 
 networks:

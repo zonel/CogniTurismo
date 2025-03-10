@@ -16,7 +16,10 @@ public static class InfrastructureServiceExtensions
         services.Configure<BufferSettings>(configuration.GetSection("BufferSettings"));
 
         services.AddScoped<ITelemetryRepository, TelemetryRepository>();
-        services.AddScoped<ITelemetryService, TelemetryService>();
+        
+        services.AddMassTransitWithRabbitMq(configuration);
+        
+        services.AddSingleton<ITelemetryService, TelemetryService>();
         
         services.AddSingleton<ITelemetryBufferService, TelemetryBufferService>();
         services.AddHostedService(provider => (TelemetryBufferService)provider.GetRequiredService<ITelemetryBufferService>());
