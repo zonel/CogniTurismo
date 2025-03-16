@@ -2,15 +2,10 @@ using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using TelemetryProcessorService;
 using TelemetryProcessorService.Configuration;
 using TelemetryProcessorService.Models;
 using Confluent.Kafka;
-using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 var builder = Host.CreateDefaultBuilder(args);
 
@@ -124,30 +119,4 @@ public class TopicNameProvider
     }
     
     public string AnomalyTopic { get; }
-}
-
-public class Worker : BackgroundService
-{
-    private readonly ILogger<Worker> _logger;
-
-    public Worker(ILogger<Worker> logger)
-    {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
-        }
-    }
-    
-    public override Task StopAsync(CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Telemetry Processor Service stopping at {Time}", 
-            DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"));
-        
-        return base.StopAsync(cancellationToken);
-    }
 }

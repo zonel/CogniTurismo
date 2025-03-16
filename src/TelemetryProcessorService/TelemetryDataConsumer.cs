@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -34,21 +31,19 @@ namespace TelemetryProcessorService
             _massTransitSettings = massTransitOptions?.Value ?? throw new ArgumentNullException(nameof(massTransitOptions));
         }
 
-        public Task Consume(ConsumeContext<TelemetryData> context)
+        public async Task Consume(ConsumeContext<TelemetryData> context)
         {
             try
             {
                 var telemetryData = context.Message;
-                
+
                 _logger.LogInformation("Received telemetry data with ID: {Id} from vehicle: {VehicleId} at {Time}", 
-                    telemetryData.Id, telemetryData.VehicleId, "2025-03-16 22:19:27");
-                
-                ProcessTelemetryDataSync(telemetryData);
-                CheckForAnomaliesSync(telemetryData);
-                
+                    telemetryData.Id, telemetryData.VehicleId, DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"));
+
+                await ProcessTelemetryDataAsync(telemetryData);
+                await CheckForAnomaliesAsync(telemetryData);
+
                 _logger.LogInformation("Successfully processed telemetry data with ID: {Id}", telemetryData.Id);
-                
-                return Task.CompletedTask;
             }
             catch (Exception ex)
             {
@@ -57,59 +52,57 @@ namespace TelemetryProcessorService
             }
         }
 
-        private void ProcessTelemetryDataSync(TelemetryData data)
+        private async Task ProcessTelemetryDataAsync(TelemetryData data)
         {
             _logger.LogDebug("Processing telemetry data with ID: {Id}", data.Id);
-            StoreInDatabaseSync(data);
+            await StoreInDatabaseAsync(data);
             _logger.LogDebug("Telemetry data processing completed for ID: {Id}", data.Id);
         }
 
-        private void StoreInDatabaseSync(TelemetryData data)
+        private async Task StoreInDatabaseAsync(TelemetryData data)
         {
-            Thread.Sleep(50);
+            // Simulate asynchronous database storing.
+            await Task.Delay(50);
         }
 
-        private void CheckForAnomaliesSync(TelemetryData data)
+        private async Task CheckForAnomaliesAsync(TelemetryData data)
         {
-            CheckBatteryPercentageAnomalySync(data);
-            CheckBatteryTemperatureAnomalySync(data);
-            CheckSpeedAnomalySync(data);
+            await CheckBatteryPercentageAnomalyAsync(data);
+            await CheckBatteryTemperatureAnomalyAsync(data);
+            await CheckSpeedAnomalyAsync(data);
         }
 
-        private void CheckSpeedAnomalySync(TelemetryData data)
+        private async Task CheckSpeedAnomalyAsync(TelemetryData data)
         {
             if (data.Speed > _anomalySettings.MovementThresholdHigh)
             {
                 _logger.LogWarning("Speed anomaly detected for vehicle {VehicleId}. Value: {Value}", 
                     data.VehicleId, data.Speed);
-                    
-                PublishAnomalySync(data, AnomalyType.Speed, data.Speed);
+                await PublishAnomalyAsync(data, AnomalyType.Speed, data.Speed);
             }
         }
 
-        private void CheckBatteryPercentageAnomalySync(TelemetryData data)
+        private async Task CheckBatteryPercentageAnomalyAsync(TelemetryData data)
         {
             if (data.BatteryPercentage < _anomalySettings.BatteryLevelThresholdLow)
             {
                 _logger.LogWarning("Battery percentage anomaly detected for vehicle {VehicleId}. Value: {Value}", 
                     data.VehicleId, data.BatteryPercentage);
-                    
-                PublishAnomalySync(data, AnomalyType.BatteryPercentage, data.BatteryPercentage);
+                await PublishAnomalyAsync(data, AnomalyType.BatteryPercentage, data.BatteryPercentage);
             }
         }
 
-        private void CheckBatteryTemperatureAnomalySync(TelemetryData data)
+        private async Task CheckBatteryTemperatureAnomalyAsync(TelemetryData data)
         {
             if (data.BatteryTemperature > _anomalySettings.BatteryTemperatureThresholdHigh)
             {
                 _logger.LogWarning("Battery temperature anomaly detected for vehicle {VehicleId}. Value: {Value}", 
                     data.VehicleId, data.BatteryTemperature);
-                    
-                PublishAnomalySync(data, AnomalyType.BatteryTemperature, data.BatteryTemperature);
+                await PublishAnomalyAsync(data, AnomalyType.BatteryTemperature, data.BatteryTemperature);
             }
         }
 
-        private void PublishAnomalySync(TelemetryData data, AnomalyType type, double value)
+        private async Task PublishAnomalyAsync(TelemetryData data, AnomalyType type, double value)
         {
             var anomalyEvent = new AnomalyEvent
             {
@@ -122,10 +115,10 @@ namespace TelemetryProcessorService
                 DetectedAt = DateTime.UtcNow
             };
 
-            _publishEndpoint.Publish(anomalyEvent).GetAwaiter().GetResult();
-            
+            await _publishEndpoint.Publish(anomalyEvent);
+
             _logger.LogInformation("Anomaly event published with ID: {Id}, Type: {Type}, Severity: {Severity} at {Time}", 
-                anomalyEvent.Id, anomalyEvent.Type, anomalyEvent.Severity, "2025-03-16 22:19:27");
+                anomalyEvent.Id, anomalyEvent.Type, anomalyEvent.Severity, DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"));
         }
 
         private AnomalySeverity CalculateSeverity(AnomalyType type, double value)
@@ -138,29 +131,29 @@ namespace TelemetryProcessorService
                 _ => AnomalySeverity.Low
             };
         }
-        
+
         private AnomalySeverity CalculateSpeedSeverity(double speed)
         {
             double threshold = _anomalySettings.MovementThresholdHigh;
-            
+
             if (speed > threshold * 2) return AnomalySeverity.High;
             if (speed > threshold * 1.5) return AnomalySeverity.Medium;
             return AnomalySeverity.Low;
         }
-        
+
         private AnomalySeverity CalculateBatteryPercentageSeverity(double percentage)
         {
             double threshold = _anomalySettings.BatteryLevelThresholdLow;
-            
+
             if (percentage < threshold / 2) return AnomalySeverity.High;
             if (percentage < threshold) return AnomalySeverity.Medium;
             return AnomalySeverity.Low;
         }
-        
+
         private AnomalySeverity CalculateBatteryTemperatureSeverity(double temperature)
         {
             double threshold = _anomalySettings.BatteryTemperatureThresholdHigh;
-            
+
             if (temperature > threshold * 1.5) return AnomalySeverity.High;
             if (temperature > threshold) return AnomalySeverity.Medium;
             return AnomalySeverity.Low;
