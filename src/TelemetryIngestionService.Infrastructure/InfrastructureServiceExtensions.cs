@@ -17,7 +17,7 @@ public static class InfrastructureServiceExtensions
 
         services.AddScoped<ITelemetryRepository, TelemetryRepository>();
         
-        services.AddMassTransitWithRabbitMq(configuration);
+        services.AddMassTransitWithKafka(configuration);
         
         services.AddSingleton<ITelemetryService, TelemetryService>();
         

@@ -1,76 +1,65 @@
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TelemetryIngestionService.Infrastructure.Configuration;
 using TelemetryIngestionService.Infrastructure.Services;
 using TelemetryIngestionService.Domain.Models;
+using Confluent.Kafka;
+using TelemetryIngestionService.Infrastructure.Configuration.TelemetryIngestionService.Infrastructure.Configuration;
 
 namespace TelemetryIngestionService.Infrastructure
 {
     public static class MassTransitExtensions
     {
-        public static IServiceCollection AddMassTransitWithRabbitMq(this IServiceCollection services, IConfiguration configuration)
+        private const string TelemetryTopicName = "telemetry-topic";
+        public static IServiceCollection AddMassTransitWithKafka(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<MassTransitSettings>(configuration.GetSection("MassTransit"));
             
-            services.AddSingleton<ITelemetryService, TelemetryService>();
+            services.AddScoped<ITelemetryService, TelemetryService>();
+            
+            var settings = configuration.GetSection("MassTransit").Get<MassTransitSettings>() 
+                ?? new MassTransitSettings();
             
             services.AddMassTransit(busConfig =>
             {
-                busConfig.UsingRabbitMq((context, cfg) =>
+                busConfig.UsingInMemory((context, cfg) =>
                 {
-                    var settings = configuration.GetSection("MassTransit").Get<MassTransitSettings>() 
-                        ?? new MassTransitSettings();
-                    
-                    cfg.Host(settings.Host, settings.VirtualHost, h =>
-                    {
-                        h.Username(settings.Username);
-                        h.Password(settings.Password);
-                        h.PublisherConfirmation = true;
-                    });
-                    
-                    var exchangeName = "telemetry-direct-exchange";
-                    var virtualHost = settings.VirtualHost == "/" ? "" : settings.VirtualHost;
-                    
-                    cfg.Message<TelemetryData>(m => 
-                    {
-                        m.SetEntityName(exchangeName);
-                    });
-                    
-                    cfg.Send<TelemetryData>(s =>
-                    {
-                        s.UseRoutingKeyFormatter(_ => "telemetry-key");
-                    });
-                    
-                    cfg.Publish<TelemetryData>(p =>
-                    {
-                        p.ExchangeType = "direct"; 
-                        p.Durable = true;
-                        p.AutoDelete = false;
-                    });
-                    
-                    cfg.ReceiveEndpoint("telemetry-queue", e =>
-                    {
-                        e.Durable = true;
-                        e.AutoDelete = false;
-                        e.PurgeOnStartup = false;
-                        
-                        e.Bind(exchangeName, x =>
+                    cfg.ConfigureEndpoints(context);
+                });
+                
+                busConfig.AddRider(rider =>
+                {
+                    rider.AddProducer<TelemetryData>(
+                        settings.Topic ?? TelemetryTopicName, 
+                        (_, producerConfig) => 
                         {
-                            x.RoutingKey = "telemetry-key";
-                            x.ExchangeType = "direct";
-                        });
+                            producerConfig.EnableDeliveryReports = true;
+                            producerConfig.MessageSendMaxRetries = 3;
+                            producerConfig.SetValueSerializer(new JsonSerializer<TelemetryData>());
+                        }
+                    );
+
+                    rider.UsingKafka((_, kafkaConfig) =>
+                    {
+                        kafkaConfig.Host(settings.Host ?? "localhost:29092");
                         
-                        e.ConfigureConsumeTopology = false;
+                        kafkaConfig.SecurityProtocol = SecurityProtocol.Plaintext;
                     });
-                    
-                    var host = settings.Host;
-                    var uriString = $"rabbitmq://{host}/{virtualHost}/telemetry-queue";
-                    EndpointConvention.Map<TelemetryData>(new Uri(uriString));
                 });
             });
             
             return services;
+        }
+    }
+    
+    public class JsonSerializer<T> : ISerializer<T>
+    {
+        public byte[] Serialize(T data, SerializationContext context)
+        {
+            if (data == null) return null!;
+            
+            var json = System.Text.Json.JsonSerializer.Serialize(data);
+            return System.Text.Encoding.UTF8.GetBytes(json);
         }
     }
 }
