@@ -28,22 +28,23 @@ namespace TelemetryIngestionService.Infrastructure
                         h.Password(settings.Password);
                         h.PublisherConfirmation = true;
                     });
-
-                    var exchangeName = "telemetry.data";
                     
-                    cfg.Send<TelemetryData>(s => 
-                    {
-                        s.UseRoutingKeyFormatter(_ => "telemetry.key");
-                    });
+                    var exchangeName = "telemetry-direct-exchange";
+                    var virtualHost = settings.VirtualHost == "/" ? "" : settings.VirtualHost;
                     
                     cfg.Message<TelemetryData>(m => 
                     {
                         m.SetEntityName(exchangeName);
                     });
                     
-                    cfg.Publish<TelemetryData>(p => 
+                    cfg.Send<TelemetryData>(s =>
                     {
-                        p.ExchangeType = "direct";
+                        s.UseRoutingKeyFormatter(_ => "telemetry-key");
+                    });
+                    
+                    cfg.Publish<TelemetryData>(p =>
+                    {
+                        p.ExchangeType = "direct"; 
                         p.Durable = true;
                         p.AutoDelete = false;
                     });
@@ -54,14 +55,18 @@ namespace TelemetryIngestionService.Infrastructure
                         e.AutoDelete = false;
                         e.PurgeOnStartup = false;
                         
-                        e.Bind(exchangeName, b =>
+                        e.Bind(exchangeName, x =>
                         {
-                            b.ExchangeType = "direct";
-                            b.RoutingKey = "telemetry.key";
-                            b.Durable = true;
+                            x.RoutingKey = "telemetry-key";
+                            x.ExchangeType = "direct";
                         });
+                        
+                        e.ConfigureConsumeTopology = false;
                     });
                     
+                    var host = settings.Host;
+                    var uriString = $"rabbitmq://{host}/{virtualHost}/telemetry-queue";
+                    EndpointConvention.Map<TelemetryData>(new Uri(uriString));
                 });
             });
             
