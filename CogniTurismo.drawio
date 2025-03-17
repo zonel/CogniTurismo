@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36" version="26.0.14">
+<mxfile host="drawio-plugin" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" modified="2025-03-17T22:28:39.249Z" version="22.1.22" etag="kaJoxwrGdqmgjEwmaXdo" type="embed">
   <diagram name="Overview" id="d5gEy8-BLkr8adyJ2Oli">
-    <mxGraphModel dx="1434" dy="1987" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1145" dy="1719" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -10,7 +10,7 @@
         <mxCell id="CfH5yJDIyVk5vHO6dM0E-5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="CfH5yJDIyVk5vHO6dM0E-2" target="CfH5yJDIyVk5vHO6dM0E-4" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="wO8aZNIX2LMmA1Gr4mB2-2" value="&lt;h2&gt;MQTT&lt;/h2&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="CfH5yJDIyVk5vHO6dM0E-5">
+        <mxCell id="wO8aZNIX2LMmA1Gr4mB2-2" value="&lt;h2&gt;MQTT&lt;/h2&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="CfH5yJDIyVk5vHO6dM0E-5" vertex="1" connectable="0">
           <mxGeometry x="-0.2" y="-2" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
@@ -31,7 +31,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="wO8aZNIX2LMmA1Gr4mB2-1" value="&lt;h2&gt;MQTT&lt;/h2&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="CfH5yJDIyVk5vHO6dM0E-9">
+        <mxCell id="wO8aZNIX2LMmA1Gr4mB2-1" value="&lt;h2&gt;MQTT&lt;/h2&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="CfH5yJDIyVk5vHO6dM0E-9" vertex="1" connectable="0">
           <mxGeometry x="0.0667" y="-1" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
@@ -103,7 +103,7 @@
             <mxPoint x="459.44" y="540" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="CfH5yJDIyVk5vHO6dM0E-22" value="&lt;h1&gt;RabbitMQ&lt;/h1&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="CfH5yJDIyVk5vHO6dM0E-21" vertex="1" connectable="0">
+        <mxCell id="CfH5yJDIyVk5vHO6dM0E-22" value="&lt;h1&gt;Kafka&lt;/h1&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="CfH5yJDIyVk5vHO6dM0E-21" vertex="1" connectable="0">
           <mxGeometry x="-0.2205" y="-2" relative="1" as="geometry">
             <mxPoint x="2" y="22" as="offset" />
           </mxGeometry>
@@ -126,7 +126,7 @@
             <mxPoint x="880" y="605" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="CfH5yJDIyVk5vHO6dM0E-31" value="&lt;h1&gt;RabbitMQ&lt;/h1&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="CfH5yJDIyVk5vHO6dM0E-30" vertex="1" connectable="0">
+        <mxCell id="CfH5yJDIyVk5vHO6dM0E-31" value="&lt;h1&gt;Kafka&lt;/h1&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="CfH5yJDIyVk5vHO6dM0E-30" vertex="1" connectable="0">
           <mxGeometry x="-0.2205" y="-2" relative="1" as="geometry">
             <mxPoint x="14" y="-2" as="offset" />
           </mxGeometry>
