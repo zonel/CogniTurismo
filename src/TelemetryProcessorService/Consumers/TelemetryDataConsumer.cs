@@ -3,33 +3,21 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TelemetryProcessorService.Configuration;
 using TelemetryProcessorService.Models;
+using TelemetryProcessorService.Producers;
 
-namespace TelemetryProcessorService
+namespace TelemetryProcessorService.Consumers
 {
-    public class TelemetryDataConsumer : IConsumer<TelemetryData>
+    public class TelemetryDataConsumer(
+        ILogger<TelemetryDataConsumer> logger,
+        IAnomalyProducer anomalyProducer,
+        IOptions<CitusDbSettings> dbOptions,
+        IOptions<AnomalyDetectionSettings> anomalyOptions)
+        : IConsumer<TelemetryData>
     {
-        private readonly ILogger<TelemetryDataConsumer> _logger;
-        private readonly IPublishEndpoint _publishEndpoint;
-        private readonly TopicNameProvider _topicProvider;
-        private readonly CitusDbSettings _dbSettings;
-        private readonly AnomalyDetectionSettings _anomalySettings;
-        private readonly MassTransitSettings _massTransitSettings;
-
-        public TelemetryDataConsumer(
-            ILogger<TelemetryDataConsumer> logger,
-            IPublishEndpoint publishEndpoint,
-            TopicNameProvider topicProvider,
-            IOptions<CitusDbSettings> dbOptions,
-            IOptions<AnomalyDetectionSettings> anomalyOptions,
-            IOptions<MassTransitSettings> massTransitOptions)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _publishEndpoint = publishEndpoint ?? throw new ArgumentNullException(nameof(publishEndpoint));
-            _topicProvider = topicProvider ?? throw new ArgumentNullException(nameof(topicProvider));
-            _dbSettings = dbOptions?.Value ?? throw new ArgumentNullException(nameof(dbOptions));
-            _anomalySettings = anomalyOptions?.Value ?? throw new ArgumentNullException(nameof(anomalyOptions));
-            _massTransitSettings = massTransitOptions?.Value ?? throw new ArgumentNullException(nameof(massTransitOptions));
-        }
+        private readonly ILogger<TelemetryDataConsumer> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly IAnomalyProducer _anomalyProducer = anomalyProducer ?? throw new ArgumentNullException(nameof(anomalyProducer));
+        private readonly CitusDbSettings _dbSettings = dbOptions?.Value ?? throw new ArgumentNullException(nameof(dbOptions));
+        private readonly AnomalyDetectionSettings _anomalySettings = anomalyOptions?.Value ?? throw new ArgumentNullException(nameof(anomalyOptions));
 
         public async Task Consume(ConsumeContext<TelemetryData> context)
         {
@@ -61,7 +49,6 @@ namespace TelemetryProcessorService
 
         private async Task StoreInDatabaseAsync(TelemetryData data)
         {
-            // Simulate asynchronous database storing.
             await Task.Delay(50);
         }
 
@@ -78,7 +65,9 @@ namespace TelemetryProcessorService
             {
                 _logger.LogWarning("Speed anomaly detected for vehicle {VehicleId}. Value: {Value}", 
                     data.VehicleId, data.Speed);
-                await PublishAnomalyAsync(data, AnomalyType.Speed, data.Speed);
+                
+                var severity = CalculateSpeedSeverity(data.Speed);
+                await _anomalyProducer.PublishAnomalyAsync(data, AnomalyType.Speed, data.Speed, severity);
             }
         }
 
@@ -88,7 +77,9 @@ namespace TelemetryProcessorService
             {
                 _logger.LogWarning("Battery percentage anomaly detected for vehicle {VehicleId}. Value: {Value}", 
                     data.VehicleId, data.BatteryPercentage);
-                await PublishAnomalyAsync(data, AnomalyType.BatteryPercentage, data.BatteryPercentage);
+                
+                var severity = CalculateBatteryPercentageSeverity(data.BatteryPercentage);
+                await _anomalyProducer.PublishAnomalyAsync(data, AnomalyType.BatteryPercentage, data.BatteryPercentage, severity);
             }
         }
 
@@ -98,38 +89,10 @@ namespace TelemetryProcessorService
             {
                 _logger.LogWarning("Battery temperature anomaly detected for vehicle {VehicleId}. Value: {Value}", 
                     data.VehicleId, data.BatteryTemperature);
-                await PublishAnomalyAsync(data, AnomalyType.BatteryTemperature, data.BatteryTemperature);
+                
+                var severity = CalculateBatteryTemperatureSeverity(data.BatteryTemperature);
+                await _anomalyProducer.PublishAnomalyAsync(data, AnomalyType.BatteryTemperature, data.BatteryTemperature, severity);
             }
-        }
-
-        private async Task PublishAnomalyAsync(TelemetryData data, AnomalyType type, double value)
-        {
-            var anomalyEvent = new AnomalyEvent
-            {
-                Id = Guid.NewGuid(),
-                TelemetryId = data.Id,
-                VehicleId = data.VehicleId,
-                Type = type,
-                Value = value,
-                Severity = CalculateSeverity(type, value),
-                DetectedAt = DateTime.UtcNow
-            };
-
-            await _publishEndpoint.Publish(anomalyEvent);
-
-            _logger.LogInformation("Anomaly event published with ID: {Id}, Type: {Type}, Severity: {Severity} at {Time}", 
-                anomalyEvent.Id, anomalyEvent.Type, anomalyEvent.Severity, DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"));
-        }
-
-        private AnomalySeverity CalculateSeverity(AnomalyType type, double value)
-        {
-            return type switch
-            {
-                AnomalyType.Speed => CalculateSpeedSeverity(value),
-                AnomalyType.BatteryPercentage => CalculateBatteryPercentageSeverity(value),
-                AnomalyType.BatteryTemperature => CalculateBatteryTemperatureSeverity(value),
-                _ => AnomalySeverity.Low
-            };
         }
 
         private AnomalySeverity CalculateSpeedSeverity(double speed)

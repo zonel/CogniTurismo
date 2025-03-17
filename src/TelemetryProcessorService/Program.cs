@@ -6,6 +6,8 @@ using TelemetryProcessorService;
 using TelemetryProcessorService.Configuration;
 using TelemetryProcessorService.Models;
 using Confluent.Kafka;
+using TelemetryProcessorService.Consumers;
+using TelemetryProcessorService.Producers;
 
 var builder = Host.CreateDefaultBuilder(args);
 
@@ -54,34 +56,42 @@ builder.ConfigureServices((hostContext, services) =>
     services.Configure<MassTransitSettings>(massTransitSection);
     
     services.AddSingleton<TopicNameProvider>();
+    services.AddSingleton<IAnomalyProducer, AnomalyProducer>();
     
     services.AddTransient<TelemetryDataConsumer>();
     
+    var settings = massTransitSection.Get<MassTransitSettings>();
+    if (settings == null)
+    {
+        throw new InvalidOperationException("MassTransit settings could not be loaded.");
+    }
+    
+    var kafkaHost = settings.Host ?? "localhost:29092";
+    var telemetryTopic = settings.Topic ?? "telemetry-topic";
+    var consumerGroup = settings.ConsumerGroup ?? "telemetry-processor-group";
+    var anomalyTopic = settings.AnomalyTopic ?? "telemetry-anomaly";
+    
     services.AddMassTransit(x =>
     {
-        x.UsingInMemory((context, cfg) =>
+        x.UsingInMemory((context, cfg) => 
         {
             cfg.ConfigureEndpoints(context);
         });
         
         x.AddRider(rider =>
         {
-            var settings = massTransitSection.Get<MassTransitSettings>();
-            if (settings == null)
-            {
-                throw new InvalidOperationException("MassTransit settings could not be loaded.");
-            }
-            
             rider.AddConsumer<TelemetryDataConsumer>();
             
             rider.UsingKafka((context, kafkaConfig) =>
             {
-                kafkaConfig.Host(settings.Host ?? "localhost:29092");
+                kafkaConfig.Host(kafkaHost);
                 kafkaConfig.SecurityProtocol = SecurityProtocol.Plaintext;
                 
+                kafkaConfig.ClientId = "telemetry-processor-client";
+                
                 kafkaConfig.TopicEndpoint<TelemetryData>(
-                    settings.Topic ?? "telemetry-topic", 
-                    settings.ConsumerGroup ?? "telemetry-processor-group",
+                    telemetryTopic, 
+                    consumerGroup,
                     e =>
                     {
                         e.ConfigureConsumer<TelemetryDataConsumer>(context);
@@ -93,11 +103,21 @@ builder.ConfigureServices((hostContext, services) =>
                             t.ReplicationFactor = 1;
                         });
                     });
+                
+                kafkaConfig.TopicEndpoint<AnomalyEvent>(
+                    anomalyTopic,
+                    "anomaly-topic-consumer",
+                    e =>
+                    {
+                        e.CreateIfMissing(t =>
+                        {
+                            t.NumPartitions = 1;
+                            t.ReplicationFactor = 1;
+                        });
+                    });
             });
             
-            rider.AddProducer<AnomalyEvent>(
-                settings.AnomalyTopic ?? "telemetry-anomaly"
-            );
+            rider.AddProducer<AnomalyEvent>(anomalyTopic);
         });
     });
     
@@ -106,17 +126,3 @@ builder.ConfigureServices((hostContext, services) =>
 
 var app = builder.Build();
 await app.RunAsync();
-
-public class TopicNameProvider
-{
-    private readonly IConfiguration _configuration;
-    
-    public TopicNameProvider(IConfiguration configuration)
-    {
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        var massTransitSettings = _configuration.GetSection("MassTransit").Get<MassTransitSettings>();
-        AnomalyTopic = massTransitSettings?.AnomalyTopic ?? "telemetry-anomaly";
-    }
-    
-    public string AnomalyTopic { get; }
-}
