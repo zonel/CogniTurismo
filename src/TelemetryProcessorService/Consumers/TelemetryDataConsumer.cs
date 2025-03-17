@@ -4,29 +4,29 @@ using Microsoft.Extensions.Options;
 using TelemetryProcessorService.Configuration;
 using TelemetryProcessorService.Models;
 using TelemetryProcessorService.Services;
+using System;
+using System.Threading.Tasks;
+using TelemetryProcessorService.Persistence;
 
 namespace TelemetryProcessorService.Consumers
 {
     public class TelemetryDataConsumer(
         ILogger<TelemetryDataConsumer> logger,
         IAnomalyDetectionService anomalyDetectionService,
-        IOptions<CitusDbSettings> dbOptions)
+        ITelemetryDataStorageService storageService)
         : IConsumer<TelemetryData>
     {
         private readonly ILogger<TelemetryDataConsumer> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         private readonly IAnomalyDetectionService _anomalyDetectionService = anomalyDetectionService ?? throw new ArgumentNullException(nameof(anomalyDetectionService));
-        private readonly CitusDbSettings _dbSettings = dbOptions?.Value ?? throw new ArgumentNullException(nameof(dbOptions));
+        private readonly ITelemetryDataStorageService _storageService = storageService ?? throw new ArgumentNullException(nameof(storageService));
 
         public async Task Consume(ConsumeContext<TelemetryData> context)
         {
             try
             {
-                var telemetryData = context.Message;
+                await ProcessTelemetryDataAsync(context);
 
-                await ProcessTelemetryDataAsync(telemetryData);
-                await _anomalyDetectionService.CheckForAnomaliesAsync(telemetryData);
-
-                _logger.LogInformation("Successfully processed telemetry data with ID: {Id}", telemetryData.Id);
+                _logger.LogInformation("Successfully processed telemetry data with ID: {Id}", context.Message.Id);
             }
             catch (Exception ex)
             {
@@ -35,16 +35,13 @@ namespace TelemetryProcessorService.Consumers
             }
         }
 
-        private async Task ProcessTelemetryDataAsync(TelemetryData data)
+        private async Task ProcessTelemetryDataAsync(ConsumeContext<TelemetryData> context)
         {
-            _logger.LogDebug("Processing telemetry data with ID: {Id}", data.Id);
-            await StoreInDatabaseAsync(data);
-            _logger.LogDebug("Telemetry data processing completed for ID: {Id}", data.Id);
-        }
-
-        private async Task StoreInDatabaseAsync(TelemetryData data)
-        {
-            await Task.Delay(50);
+            var telemetryData = context.Message;
+            _logger.LogDebug("Processing telemetry data with ID: {Id}", telemetryData.Id);
+            await _storageService.StoreTelemetryDataAsync(telemetryData);
+            _logger.LogDebug("Telemetry data processing completed for ID: {Id}", telemetryData.Id);
+            await _anomalyDetectionService.CheckForAnomaliesAsync(telemetryData);
         }
     }
 }

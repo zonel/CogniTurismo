@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using TelemetryProcessorService;
 using TelemetryProcessorService.Configuration;
 using TelemetryProcessorService.Consumers;
+using TelemetryProcessorService.Persistence;
 using TelemetryProcessorService.Producers;
 using TelemetryProcessorService.Services;
 
@@ -57,6 +58,7 @@ builder.ConfigureServices((hostContext, services) =>
     services.AddSingleton<TopicNameProvider>();
     services.AddSingleton<IAnomalyProducer, AnomalyProducer>();
     services.AddSingleton<IAnomalyDetectionService, AnomalyDetectionService>();
+    services.AddSingleton<ITelemetryDataStorageService, TelemetryDataStorageService>();
     
     services.AddTransient<TelemetryDataConsumer>();
     
