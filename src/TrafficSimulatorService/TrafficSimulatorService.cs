@@ -1,7 +1,9 @@
+using System.Text.Json;
+using Microsoft.Extensions.Options;
 using MQTTnet;
 using MQTTnet.Client;
-using Microsoft.Extensions.Options;
-using System.Text.Json;
+
+namespace TrafficSimulatorService;
 
 public class TrafficSimulatorService
 {
@@ -55,7 +57,7 @@ public class TrafficSimulatorService
             Longitude = _random.NextDouble() * 360 - 180,
             Speed = _random.Next(0, 120),
             BatteryPercentage = _random.NextDouble() * 100,
-            BatteryTemperature = _random.Next(15, 45),
+            BatteryTemperature = _random.Next(15, 47),
             RecordedAt = DateTime.UtcNow
         };
     }

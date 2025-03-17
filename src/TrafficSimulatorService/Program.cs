@@ -10,9 +10,9 @@ var builder = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
         services.Configure<MqttSettings>(context.Configuration.GetSection("MqttSettings"));
-        services.AddSingleton<TrafficSimulatorService>();
+        services.AddSingleton<TrafficSimulatorService.TrafficSimulatorService>();
     })
     .Build();
 
-var simulator = builder.Services.GetRequiredService<TrafficSimulatorService>();
+var simulator = builder.Services.GetRequiredService<TrafficSimulatorService.TrafficSimulatorService>();
 await simulator.StartAsync();
