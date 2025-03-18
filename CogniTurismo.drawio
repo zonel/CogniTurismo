@@ -1,6 +1,6 @@
-<mxfile host="drawio-plugin" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" modified="2025-03-17T22:28:39.249Z" version="22.1.22" etag="kaJoxwrGdqmgjEwmaXdo" type="embed">
+<mxfile host="drawio-plugin" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" modified="2025-03-17T22:35:45.098Z" version="22.1.22" etag="vnEqOfOe_vocPCCnD9_S" type="embed">
   <diagram name="Overview" id="d5gEy8-BLkr8adyJ2Oli">
-    <mxGraphModel dx="1145" dy="1719" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1145" dy="2152" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -88,10 +88,7 @@
         <mxCell id="CfH5yJDIyVk5vHO6dM0E-20" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="CfH5yJDIyVk5vHO6dM0E-17" target="CfH5yJDIyVk5vHO6dM0E-19" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="iwOI1-6Wy1DFqGVwUgVn-16" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="CfH5yJDIyVk5vHO6dM0E-17" target="iwOI1-6Wy1DFqGVwUgVn-14" edge="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="CfH5yJDIyVk5vHO6dM0E-17" value="&lt;h2&gt;Emergency Response Service&lt;/h2&gt;- Listens for alerts from alerts.queue&lt;br&gt;- Sends notifications (SMS, email, logs)&lt;br&gt;- Executes commands (e.g., STOP car if overheating)&lt;br&gt;- Publishes commands to commands.queue&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="CfH5yJDIyVk5vHO6dM0E-17" value="&lt;h2&gt;Emergency Alerting Service&lt;/h2&gt;- Listens for alerts from alerts.queue&lt;br&gt;- Sends notifications (SMS, email, logs)&lt;br&gt;- Executes commands (e.g., STOP car if overheating)&lt;br&gt;- Publishes commands to commands.queue&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="880" y="540" width="300" height="130" as="geometry" />
         </mxCell>
         <mxCell id="CfH5yJDIyVk5vHO6dM0E-19" value="&lt;h2&gt;&amp;nbsp;Car Control System&lt;/h2&gt;- Reads commands from commands.queue&lt;br&gt;- Controls vehicle actions (via API, MQTT, etc.)" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
@@ -148,17 +145,6 @@
         </mxCell>
         <mxCell id="iwOI1-6Wy1DFqGVwUgVn-9" value="&lt;h2&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;API&lt;/span&gt;&lt;/h2&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="310" y="1300" width="300" height="130" as="geometry" />
-        </mxCell>
-        <mxCell id="iwOI1-6Wy1DFqGVwUgVn-15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="iwOI1-6Wy1DFqGVwUgVn-14" target="CfH5yJDIyVk5vHO6dM0E-17" edge="1">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="1220" y="620" />
-              <mxPoint x="1220" y="620" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="iwOI1-6Wy1DFqGVwUgVn-14" value="PostgresDb" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#dae8fc;gradientColor=#7ea6e0;strokeColor=#6c8ebf;" parent="1" vertex="1">
-          <mxGeometry x="1250" y="565" width="80" height="80" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
