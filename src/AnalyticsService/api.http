@@ -1,0 +1,41 @@
+@baseUrl = http://localhost:5000/api
+
+### Health Check
+GET {{baseUrl}}/HealthCheck
+Accept: application/json
+
+### Get All Vehicles
+GET {{baseUrl}}/Analytics/vehicles
+Accept: application/json
+
+### Get Active Vehicles (Last 24 hours)
+GET {{baseUrl}}/Analytics/vehicles/active
+Accept: application/json
+
+### Get Active Vehicles (Last 48 hours)
+GET {{baseUrl}}/Analytics/vehicles/active?hours=48
+Accept: application/json
+
+### Get Vehicle Battery Statistics
+GET {{baseUrl}}/Analytics/vehicles/vehicle-001/battery
+Accept: application/json
+
+### Get Vehicle Usage Statistics
+GET {{baseUrl}}/Analytics/vehicles/vehicle-001/usage
+Accept: application/json
+
+### Get Vehicle Hourly Stats (Last 24 hours)
+GET {{baseUrl}}/Analytics/vehicles/vehicle-001/hourly
+Accept: application/json
+
+### Get Vehicle Hourly Stats (Custom Date Range)
+GET {{baseUrl}}/Analytics/vehicles/vehicle-071/hourly?startDate=2025-03-20T00:00:00Z&endDate=2025-03-25T23:59:59Z
+Accept: application/json
+
+### Find Vehicles Near Location (Berlin)
+GET {{baseUrl}}/Analytics/vehicles/nearby?latitude=52.5200&longitude=13.4050&radiusKm=10
+Accept: application/json
+
+### Refresh Materialized Views
+POST {{baseUrl}}/Analytics/refresh
+Content-Type: application/json

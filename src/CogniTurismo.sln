@@ -25,6 +25,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EmergencyAlertingService", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmergencyAlertingService", "EmergencyAlertingService\EmergencyAlertingService.csproj", "{92AE420C-365D-4F31-89FB-41A1855BFF90}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TelemetryAnalyticsService", "TelemetryAnalyticsService", "{C18A7482-202B-4364-8F48-A5EA96513B75}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnalyticsService", "AnalyticsService\AnalyticsService.csproj", "{8F9CEFF3-BA75-4E25-923F-738E471334A3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +41,7 @@ Global
 		{166F2D93-A9E8-4745-B8D6-1E8645433F44} = {8EC16A61-F9A8-47A3-81FB-CC8A2591E8B2}
 		{4F890CEF-D6A7-4BFB-BB5F-25BCD46B3C4B} = {1483A3F8-5DAD-4512-8BEA-3F155F162DEC}
 		{92AE420C-365D-4F31-89FB-41A1855BFF90} = {344CF49E-969D-4E1A-BA6F-E55EF1B7F68C}
+		{8F9CEFF3-BA75-4E25-923F-738E471334A3} = {C18A7482-202B-4364-8F48-A5EA96513B75}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{6C221EC6-5666-4E9A-918C-D8152D1887E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -63,5 +68,9 @@ Global
 		{92AE420C-365D-4F31-89FB-41A1855BFF90}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92AE420C-365D-4F31-89FB-41A1855BFF90}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92AE420C-365D-4F31-89FB-41A1855BFF90}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F9CEFF3-BA75-4E25-923F-738E471334A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F9CEFF3-BA75-4E25-923F-738E471334A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F9CEFF3-BA75-4E25-923F-738E471334A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F9CEFF3-BA75-4E25-923F-738E471334A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
