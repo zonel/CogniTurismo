@@ -19,6 +19,12 @@ until PGPASSWORD=postgres psql -h citus_worker2 -U postgres -c '\q'; do
   sleep 2
 done
 
+# Enable Citus extension on the coordinator
+echo "Creating and enabling Citus extension on coordinator..."
+PGPASSWORD=postgres psql -h citus_coordinator -U postgres <<-EOSQL
+  CREATE EXTENSION IF NOT EXISTS citus;
+EOSQL
+
 # Check if nodes are already added
 NODE_COUNT=$(PGPASSWORD=postgres psql -h citus_coordinator -U postgres -t -c "SELECT COUNT(*) FROM pg_dist_node;" | xargs)
 
