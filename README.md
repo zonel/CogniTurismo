@@ -1,4 +1,4 @@
 # CogniTurismo
 > "**Cognitive**" (AI-driven intelligence) + "**Turismo**" (luxury touring and high-performance travel).
 
-![timelapse](https://github.com/user-attachments/assets/76827d17-efcb-425e-a988-774bf5104580)
+![cogniturismo](https://github.com/user-attachments/assets/45ae801f-db24-4d16-8718-6325d9b935d1)
